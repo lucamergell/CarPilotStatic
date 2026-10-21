@@ -3,49 +3,66 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Hero } from './pages/Hero';
 import { PrivacyPolicy } from './pages/PrivacyPolicy';
 import { TermsOfService } from './pages/TermsOfService';
 
-function normalizePath(pathname: string): string {
-  const clean = pathname.toLowerCase().replace(/\/+$/, '') || '/';
-  if (clean.includes('privacypolicy')) return '/privacypolicy';
-  if (clean.includes('termsofservice')) return '/termsofservice';
+function detectRoute(): string {
+  if (typeof window === 'undefined') return '/';
+  
+  const path = window.location.pathname.toLowerCase();
+  const hash = window.location.hash.toLowerCase();
+  const search = window.location.search.toLowerCase();
+  const full = `${path} ${hash} ${search}`;
+
+  if (full.includes('privacypolicy') || full.includes('privacy-policy') || full.includes('privacy')) {
+    return '/privacypolicy';
+  }
+  if (full.includes('termsofservice') || full.includes('terms-of-service') || full.includes('terms') || full.includes('tos')) {
+    return '/termsofservice';
+  }
   return '/';
 }
 
 export default function App() {
-  const [currentPath, setCurrentPath] = useState<string>(() => {
-    if (typeof window !== 'undefined') {
-      return normalizePath(window.location.pathname);
-    }
-    return '/';
-  });
+  const [currentRoute, setCurrentRoute] = useState<string>(detectRoute);
+
+  const updateRoute = useCallback(() => {
+    setCurrentRoute(detectRoute());
+  }, []);
 
   useEffect(() => {
-    const handlePopState = () => {
-      setCurrentPath(normalizePath(window.location.pathname));
+    // Sync route on initial mount in case DOM loaded with specific path
+    updateRoute();
+
+    const handleLocationChange = () => {
+      updateRoute();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+    window.addEventListener('popstate', handleLocationChange);
+    window.addEventListener('hashchange', handleLocationChange);
 
-  const navigate = (path: string) => {
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      window.removeEventListener('hashchange', handleLocationChange);
+    };
+  }, [updateRoute]);
+
+  const navigate = (toPath: string) => {
     if (typeof window !== 'undefined') {
-      window.history.pushState({}, '', path);
-      setCurrentPath(normalizePath(path));
+      window.history.pushState({}, '', toPath);
+      setCurrentRoute(toPath);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
-  if (currentPath === '/privacypolicy') {
+  if (currentRoute === '/privacypolicy') {
     return <PrivacyPolicy onNavigate={navigate} />;
   }
 
-  if (currentPath === '/termsofservice') {
+  if (currentRoute === '/termsofservice') {
     return <TermsOfService onNavigate={navigate} />;
   }
 
