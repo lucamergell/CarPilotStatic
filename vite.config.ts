@@ -17,6 +17,8 @@ function spaRoutingPlugin(): Plugin {
       req.url = '/privacypolicy/index.html' + (rawUrl.includes('?') ? '?' + rawUrl.split('?')[1] : '');
     } else if (pathname === '/termsofservice' || pathname === '/termsofservice/') {
       req.url = '/termsofservice/index.html' + (rawUrl.includes('?') ? '?' + rawUrl.split('?')[1] : '');
+    } else if (pathname === '/support' || pathname === '/support/') {
+      req.url = '/support/index.html' + (rawUrl.includes('?') ? '?' + rawUrl.split('?')[1] : '');
     }
     next();
   };
@@ -51,6 +53,7 @@ export default defineConfig(() => {
           main: path.resolve(__dirname, 'index.html'),
           privacypolicy: path.resolve(__dirname, 'privacypolicy/index.html'),
           termsofservice: path.resolve(__dirname, 'termsofservice/index.html'),
+          support: path.resolve(__dirname, 'support/index.html'),
         },
       },
     },

@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Hero } from './pages/Hero';
 import { PrivacyPolicy } from './pages/PrivacyPolicy';
 import { TermsOfService } from './pages/TermsOfService';
+import { Support } from './pages/Support';
 
 function detectRoute(): string {
   if (typeof window === 'undefined') return '/';
@@ -21,6 +22,9 @@ function detectRoute(): string {
   }
   if (full.includes('termsofservice') || full.includes('terms-of-service') || full.includes('terms') || full.includes('tos')) {
     return '/termsofservice';
+  }
+  if (full.includes('support')) {
+    return '/support';
   }
   return '/';
 }
@@ -64,6 +68,10 @@ export default function App() {
 
   if (currentRoute === '/termsofservice') {
     return <TermsOfService onNavigate={navigate} />;
+  }
+
+  if (currentRoute === '/support') {
+    return <Support onNavigate={navigate} />;
   }
 
   return <Hero onNavigate={navigate} />;
